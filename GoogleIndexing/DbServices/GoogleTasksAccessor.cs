@@ -13,7 +13,7 @@ public class GoogleTasksAccessor
         await collection.InsertManyAsync(googleTasks);
 
     public async Task<List<GoogleTask>> GetTasksAsync(int skip, int limit) =>
-        await collection.Find(_ => true).SortBy(task => task.AddTime).Skip(skip).Limit(limit).ToListAsync();
+        await collection.Find(_ => true).SortByDescending(task => task.AddTime).Skip(skip).Limit(limit).ToListAsync();
 
     public Task<List<GoogleTask>> GetTasksForUpdateAsync(int quotaCount, bool highPriorityOnly = false) =>
         highPriorityOnly
