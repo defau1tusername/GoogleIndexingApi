@@ -15,10 +15,10 @@ public class GoogleTasksAccessor
     public async Task<List<GoogleTask>> GetTasksAsync(int skip, int limit) =>
         await collection.Find(_ => true).SortByDescending(task => task.AddTime).Skip(skip).Limit(limit).ToListAsync();
 
-    public Task<List<GoogleTask>> GetTasksForUpdateAsync(int quotaCount, bool highPriorityOnly = false) =>
-        highPriorityOnly
-            ? collection.Find(task => !task.IsCompleted && task.IsPriority).Limit(quotaCount).ToListAsync()
-            : collection.Find(task => !task.IsCompleted).Limit(quotaCount).ToListAsync();
+    public Task<List<GoogleTask>> GetTasksForUpdateAsync(int quotaCount, bool isSecondQueue = false) =>
+        isSecondQueue
+            ? collection.Find(task => !task.IsCompleted).Limit(quotaCount).ToListAsync()
+            : collection.Find(task => !task.IsCompleted && task.IsPriority).Limit(quotaCount).ToListAsync();
 
     public async Task UpdateGoogleResponsesAsync(Dictionary<Guid, GoogleResponse> googleResponses)
     {
