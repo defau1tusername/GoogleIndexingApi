@@ -20,7 +20,7 @@ public class GoogleClient
     }
 
     public async Task<Dictionary<Guid, GoogleResponse>> SendNotificationsAsync(
-        List<GoogleNotificationRequest> googleNotificationRequests)
+        GoogleNotificationRequest[] googleNotificationRequests)
     {
         var batch = new BatchRequest(googleService);
         var googleResponses = new Dictionary<Guid, GoogleResponse>();
