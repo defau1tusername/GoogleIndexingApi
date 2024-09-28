@@ -35,21 +35,23 @@ public class TaskExecutorBgService : BackgroundService
         var serviceAccount = await serviceAccountsAccessor.GetAccountAsync();
         if (serviceAccount == null)
             return;
-
-        var tasks = isTimeOfSecondQueue
-            ? await googleTasksAccessor.GetTasksForUpdateAsync(int.Min(serviceAccount.QuotaCount, 100))
-            : await googleTasksAccessor.GetTasksForUpdateAsync(int.Min(serviceAccount.QuotaCount, 100), true);
-
+        
+        var tasks = await googleTasksAccessor
+            .GetTasksForUpdateAsync(serviceAccount.QuotaCount, isTimeOfSecondQueue);
+        
         if (!tasks.Any())
             return;
-
+        
         var googleNotificationRequests = GetGoogleNotificationRequests(tasks);
-
+        
         var googleClient = new GoogleClient(serviceAccount.Key);
-        var googleResponses = await googleClient.SendNotificationsAsync(googleNotificationRequests);
-
-        await serviceAccountsAccessor.ReduceQuotaAsync(serviceAccount, tasks.Count);
-        await googleTasksAccessor.UpdateGoogleResponsesAsync(googleResponses);
+        
+        foreach (var googleNotificationRequestsChunk in googleNotificationRequests.Chunk(100))
+        {
+            var googleResponses = await googleClient.SendNotificationsAsync(googleNotificationRequestsChunk);
+            await serviceAccountsAccessor.ReduceQuotaAsync(serviceAccount, googleNotificationRequestsChunk.Length);
+            await googleTasksAccessor.UpdateGoogleResponsesAsync(googleResponses);
+        }
     }
 
     private List<GoogleNotificationRequest> GetGoogleNotificationRequests(List<GoogleTask> tasks)
