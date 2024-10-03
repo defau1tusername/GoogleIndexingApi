@@ -100,7 +100,7 @@ public class ApiController : ControllerBase
         foreach (var serviceAccount in serviceAccounts)
             serviceAccountsView.Add(new ServiceAccountDto()
             {
-                ShortEmail = serviceAccount.Email[..9] + "***",
+                ShortEmail = serviceAccount.Email.Split('@')[0] + "@***",
                 RemainingQuota = serviceAccount.QuotaCount,
                 TotalQuota = 200
             });
